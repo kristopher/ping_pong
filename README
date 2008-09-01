@@ -1,0 +1,1 @@
+A Ruby Gosu based Pong game using a parallax ping distance sensor and an Arduino to control the paddle.
