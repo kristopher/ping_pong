@@ -1,17 +1,31 @@
-require 'ping_input'
+require 'paddle'
+require 'ball'
 
 class GameWindow < Gosu::Window
   
   def initialize(w, h)
     super(w, h, false)
-    @star = Gosu::Image.new(self, "images/paddle.png", false)
-    @range_input = PingInput.new(self)
+    @paddle = Paddle.new(self, height / 2)
+    @ball = Ball.new(self, width / 2, height / 2, :left, :up)
   end
 
   def update
+    [@ball, @paddle].each do |object|
+      object.update
+    end
   end
   
   def draw
-    @star.draw(10, @range_input.position, 0)
+    [@ball, @paddle].each do |object|
+      object.draw
+    end
+  end
+  
+  def paddle
+    @paddle
+  end
+  
+  def ball
+    @ball
   end
 end
