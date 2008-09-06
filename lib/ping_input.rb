@@ -10,8 +10,8 @@ class PingInput
     parity = SerialPort::NONE
 
     @serial_port = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-    self.median_buffer_length = 10
-    self.average_buffer_length = 10
+    self.median_buffer_length = 5
+    self.average_buffer_length = 5
     @median_buffer = []
     @average_buffer = []
     @window = window
@@ -52,7 +52,7 @@ class PingInput
   def contain(position)
     if position < 0
       0
-    elsif position >= @window.height 
+    elsif position > @window.height - 80
       @window.height - 80
     else
       position
