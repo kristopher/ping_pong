@@ -13,30 +13,26 @@ class Ball
   def speed
     10
   end
-
+  
+  def paddle_collision?
+    (Range.new(10, 30).include?(x) && Range.new(@window.paddle_position(:left), @window.paddle_position(:left) + 80).include?(y)) ||
+    (Range.new(@window.width - 50, @window.width - 30).include?(x) && Range.new(@window.paddle_position(:right), @window.paddle_position(:right) + 80).include?(y))
+  end
+  
   def update
-    if Range.new(10, 30).include?(x) && Range.new(@window.paddle.y, @window.paddle.y + 80).include?(y)
+    if paddle_collision?
       case x_direction
         when :left
           self.x_direction = :right
         when :right
           self.x_direction = :left
       end
-
     else
-      if x >= @window.width - 20
-        self.x_direction = :left
-      elsif x <= 0
-        self.x_direction = :right
-      end
-    
-    
       if y >= @window.height - 20
         self.y_direction = :up
       elsif y <= 0
         self.y_direction = :down
       end
-
     end
 
     case x_direction
@@ -52,6 +48,18 @@ class Ball
       when :down
         self.y = y + speed
     end    
+  end
+  
+  def off_screen?
+     x <= -20 || x >= @window.width
+  end
+
+  def off_screen_side
+    if x <= -20
+      :left
+    elsif x >= @window.width
+      :right
+    end
   end
   
   def draw

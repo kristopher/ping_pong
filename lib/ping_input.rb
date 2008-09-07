@@ -10,16 +10,19 @@ class PingInput
     parity = SerialPort::NONE
 
     @serial_port = SerialPort.new(port_str, baud_rate, data_bits, stop_bits, parity)
-    self.median_buffer_length = 5
+    self.median_buffer_length = 3
     self.average_buffer_length = 5
-    @median_buffer = []
-    @average_buffer = []
+    @median_buffer_right = []
+    @median_buffer_left = []
+    @average_buffer_right = []
+    @average_buffer_left = []
     @window = window
   end
   
   def position  
     @serial_port.putc 1
-    normalized_position(@serial_port.gets.chomp.to_i) 
+    positions = @serial_port.gets.chomp.split(',')
+    [normalized_position(positions.first().to_i, :left), normalized_position(positions.last().to_i, :right)]
   end
   
   def calibrate
@@ -31,22 +34,22 @@ class PingInput
     contain(raw - 700)
   end
   
-  def normalized_position(raw)
-    @median_buffer.shift if @median_buffer[median_buffer_length]
-    @median_buffer.push(calibrated_position(raw))
+  def normalized_position(raw, side)
+    instance_variable_get("@median_buffer_#{side}").shift if instance_variable_get("@median_buffer_#{side}")[median_buffer_length]
+    instance_variable_get("@median_buffer_#{side}").push(calibrated_position(raw))
 
-    @average_buffer.shift if @average_buffer[average_buffer_length]    
-    if @median_buffer.sort.size % 2 == 0  
-       @average_buffer.push(@median_buffer.sort[@median_buffer.sort.size / 2])
+    instance_variable_get("@average_buffer_#{side}").shift if instance_variable_get("@average_buffer_#{side}")[average_buffer_length]    
+    if instance_variable_get("@median_buffer_#{side}").sort.size % 2 == 0  
+       instance_variable_get("@average_buffer_#{side}").push(instance_variable_get("@median_buffer_#{side}").sort[instance_variable_get("@median_buffer_#{side}").sort.size / 2])
     else  
-      @average_buffer.push((@median_buffer.sort[(@median_buffer.sort.size / 2).ceil] + @median_buffer.sort[(@median_buffer.sort.size / 2).floor]) / 2)
+      instance_variable_get("@average_buffer_#{side}").push((instance_variable_get("@median_buffer_#{side}").sort[(instance_variable_get("@median_buffer_#{side}").sort.size / 2).ceil] + instance_variable_get("@median_buffer_#{side}").sort[(instance_variable_get("@median_buffer_#{side}").sort.size / 2).floor]) / 2)
     end
     
-    sum = @average_buffer.inject do |sum, i|
+    sum = instance_variable_get("@average_buffer_#{side}").inject do |sum, i|
       sum + i
     end
     
-    contain(sum / @average_buffer.length)
+    contain(sum / instance_variable_get("@average_buffer_#{side}").length)
   end
   
   def contain(position)
